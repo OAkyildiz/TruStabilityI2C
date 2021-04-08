@@ -12,7 +12,7 @@
 #define STATUS_OK 0
 #define REPORT_LENGTH 23
 
-
+//TODO: Own raw data as union of unit32, 16, and 8
 struct cs_raw {
     
     uint8_t status;             // 2 bit
@@ -20,6 +20,7 @@ struct cs_raw {
     uint16_t temperature_data;  // 11 bit
 };
 
+//TODO: constructor to init from part no.
 /// function that requests raw data from the sensor via i2c
 ///
 /// input
@@ -48,6 +49,7 @@ uint8_t ps_get_raw(const uint8_t slave_addr, struct cs_raw *raw);
 /// output:
 ///  pressure
 ///  temperature
+//TODO: separate conversion
 uint8_t ps_convert(const struct cs_raw raw, float *pressure, float *temperature,
                    const float pressure_min, const float pressure_max);
 
