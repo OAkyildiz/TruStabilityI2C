@@ -1,0 +1,22 @@
+{
+  "name": "TruStabilityI2C",
+  "keywords": "Honeywell, TruStability, Pressure, Sensor, I2C",
+  "category": "sensors",
+  "description": "Arduino Library for I2C communications with Honeywell TruStability SSC and HSC Pressure sensors",
+  "authors":
+  [
+    {
+      "name": "Ozan Akyildiz",
+      "email": "oakyildiz@wpi.edu",
+      "maintainer": true
+    }
+  ],
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/OAkyildiz/TruStabilityI2C.git"
+  },
+  "version":"0.5.0",
+  "frameworks": "arduino",
+  "platforms": "*"
+}

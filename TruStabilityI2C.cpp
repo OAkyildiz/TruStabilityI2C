@@ -34,7 +34,8 @@
 */
 
 #include <Wire.h>
-#include "hsc_ssc_i2c.h"
+#include "TruStabilityI2C.h"
+
 
 /* you must define the slave address. you can find it based on the part number:
 
@@ -71,8 +72,8 @@ uint8_t ps_get_raw(const uint8_t slave_addr, struct cs_raw *raw)
         val[i] = Wire.read();            // by using Wire.available()
     }
     raw->status = (val[0] & 0xc0) >> 6;  // first 2 bits from first byte
-    raw->bridge_data = ((val[0] & 0x3f) << 8) + val[1];
-    raw->temperature_data = ((val[2] << 8) + (val[3] & 0xe0)) >> 5;
+    raw->bridge_data = (((uint16_t) (val[0] & 0x3f)) << 8) + val[1];
+    raw->temperature_data = ((val[2] << 8) + val[3])>>5;
     if ( raw->temperature_data == 65535 ) return 4;
     return raw->status;
 }
@@ -91,10 +92,9 @@ uint8_t ps_get_raw(const uint8_t slave_addr, struct cs_raw *raw)
 ///  pressure
 ///  temperature
 uint8_t ps_convert(const struct cs_raw raw, float *pressure, float *temperature,
-                   const uint16_t output_min, const uint16_t output_max, const float pressure_min,
-                   const float pressure_max)
+                   const float pressure_min, const float pressure_max)
 {
-    *pressure = 1.0 * (raw.bridge_data - output_min) * (pressure_max - pressure_min) / (output_max - output_min) + pressure_min;
-    *temperature = (raw.temperature_data * 0.0977) - 50;
+    *pressure = 1.0 * ((int) raw.bridge_data - OUTPUT_MIN) * (pressure_max - pressure_min) / (OUTPUT_MAX - OUTPUT_MIN) + pressure_min;
+    *temperature = ((int)raw.temperature_data *200.0/2047) - 50;
     return 0;
 }
