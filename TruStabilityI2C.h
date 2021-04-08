@@ -5,6 +5,14 @@
 #define OUTPUT_MIN 0x0666        // 10%
 #define OUTPUT_MAX 0x3999  
 
+#define ERROR_NO_DEVICE 4
+#define STATUS_DIAGNOSTIC_FAULT 3
+#define STATUS_STALE 2
+#define STATUS_COMMAND 1
+#define STATUS_OK 0
+#define REPORT_LENGTH 23
+
+
 struct cs_raw {
     
     uint8_t status;             // 2 bit
@@ -42,5 +50,7 @@ uint8_t ps_get_raw(const uint8_t slave_addr, struct cs_raw *raw);
 ///  temperature
 uint8_t ps_convert(const struct cs_raw raw, float *pressure, float *temperature,
                    const float pressure_min, const float pressure_max);
+
+void ps_report(char *rep, const uint8_t status);
 
 #endif

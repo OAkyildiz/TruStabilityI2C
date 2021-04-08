@@ -1,6 +1,6 @@
 
 #include <Wire.h>
-#include "hsc_ssc_i2c.h"
+#include "TruStabilityI2C.h"
 
 // see hsc_ssc_i2c.h for a description of these values
 // these defaults are valid for the HSCMRNN030PA2A3 chip
@@ -9,8 +9,10 @@
 #define PRESSURE_MIN 0.0        // min is 0 for sensors that give absolute values
 #define PRESSURE_MAX 100.0   // 100mbar
 
+#define T_STEP 1000
+
 uint32_t prev = 0; 
-const uint32_t interval = 5000;
+
 
 void setup()
 {
@@ -22,51 +24,38 @@ void setup()
 
 void loop()
 {
-    unsigned long now = millis();
-    struct cs_raw ps;
-    char p_str[10], t_str[10];
-    uint8_t el;
-    float p, t;
-    if ((now - prev > interval) && (Serial.available() <= 0)) {
-        prev = now;
-        el = ps_get_raw(SLAVE_ADDR, &ps);
-        // for some reason my chip triggers a diagnostic fault
-        // on 50% of powerups without a notable impact 
-        // to the output values.
-        if ( el == 4 ) {
-            Serial.println("err sensor missing");
-        } else {
-            if ( el == 3 ) {
-                Serial.print("err diagnostic fault ");
-                Serial.println(ps.status, BIN);
-            }
-            if ( el == 2 ) {
-                // if data has already been feched since the last
-                // measurement cycle
-                Serial.print("warn stale data ");
-                Serial.println(ps.status, BIN);
-            }
-            if ( el == 1 ) {
-                // chip in command mode
-                // no clue how to end up here
-                Serial.print("warn command mode ");
-                Serial.println(ps.status, BIN);
-            }
-            Serial.print("status      ");
-            Serial.println(ps.status, BIN);
-            Serial.print("bridge_data ");
-            Serial.println(ps.bridge_data, DEC);
-            Serial.print("temp_data   ");
-            Serial.println(ps.temperature_data, DEC);
-            Serial.println("");
-            ps_convert(ps, &p, &t, PRESSURE_MIN,
-                   PRESSURE_MAX);
-     
-            Serial.print("pressure    (mbar) ");
-            Serial.println(p,2);
-            Serial.print("temperature (dC) ");
-            Serial.println(t,2);
-            Serial.println("");
+    static struct cs_raw ps;
+    static char p_str[10], t_str[10];
+    static uint8_t el;
+    static float p, t;
+
+    el = ps_get_raw(SLAVE_ADDR, &ps);
+    // for some reason my chip triggers a diagnostic fault
+    // on 50% of powerups without a notable impact 
+    // to the output values.
+    // TODO: put rep into the library
+    static char rep[23];
+    ps_report(rep, el);
+    Serial.println(rep);
+
+    if (el< ERROR_NO_DEVICE){
+        Serial.println("status | bridge | temp");
+        Serial.print("     "); Serial.print(ps.status, BIN);
+        Serial.print("     "); Serial.print(ps.bridge_data, DEC);
+        Serial.print("     "); Serial.println(ps.temperature_data, DEC);
+        Serial.println("");
+
+        ps_convert(ps, &p, &t, PRESSURE_MIN,
+                PRESSURE_MAX);
+    
+        Serial.print("P: ");
+        Serial.print(p,2);
+        Serial.println("mbar");
+        Serial.print("T: ");
+        Serial.print(t,2);
+        Serial.println("°C");
+        Serial.println("");
         }
-    }
+
+        delay(T_STEP);
 }

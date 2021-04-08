@@ -98,3 +98,30 @@ uint8_t ps_convert(const struct cs_raw raw, float *pressure, float *temperature,
     *temperature = ((int)raw.temperature_data *200.0/2047) - 50;
     return 0;
 }
+
+void ps_report(char *rep, const uint8_t status){
+    switch(status){
+
+        case STATUS_DIAGNOSTIC_FAULT:
+            strcpy(rep, "ERR: Diagnostic fault!");
+            break; 
+        
+        case STATUS_STALE:
+            strcpy(rep, "WARN: Stale data");
+            break; 
+
+        case STATUS_COMMAND:
+            strcpy(rep,  "ERR: In command mode!");
+            break; 
+
+        case STATUS_OK:
+            strcpy(rep, "STATUS: OK!");
+            break; 
+
+        case ERROR_NO_DEVICE:
+        default:
+            strcpy(rep, "ERR: Sensor missing!");
+            break; 
+        }
+}
+
